@@ -123,20 +123,26 @@ abstract class Request
     {
         $queryString = $this->buildQueryString();
 
-        $headers = array(
-            'method' => 'POST',
-            'content' => $this->buildQueryString(),
-            'header' => "Content-type: application/x-www-form-urlencoded\r\n" .
-            "Content-Length: " . strlen($queryString) . "\r\n\r\n"
-        );
+        //setting the curl parameters.
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $this->getPaypalUrl());
+        curl_setopt($ch, CURLOPT_VERBOSE, 1);
 
-        $request = file_get_contents(
-            $this->getPaypalUrl(),
-            false,
-            stream_context_create(array('http' => $headers))
-        );
+        //turning off the server and peer verification(TrustManager Concept).
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
 
-        return new Response($request);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
+        curl_setopt($ch, CURLOPT_POST, 1);
+
+        //setting the nvpreq as POST FIELD to curl
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $queryString);
+
+        //getting response from server
+        $result = curl_exec($ch);
+        curl_close($ch);
+
+        return new Response($result);
     }
 
     /**
