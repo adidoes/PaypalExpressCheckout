@@ -6,7 +6,7 @@ use PaypalExpressCheckout\Response;
 abstract class Request
 {
     const VERSION = 97.0;
-    public $sandbox = true;
+    public $sandbox = false;
     protected $_requiredParams = array();
     protected $_optionalParams = array();
     protected $_debug = false;
