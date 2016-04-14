@@ -10,8 +10,11 @@ namespace PaypalExpressCheckout;
  */
 class Response
 {
+    public $sandbox = false;
     protected $parameters = array();
     protected $_response = null;
+    protected $_sandboxEndPoint = 'https://www.sandbox.paypal.com/webscr?cmd=_express-checkout&token=';
+    protected $_endPoint = 'https://www.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=';
 
     public function __construct($result = null)
     {
@@ -23,6 +26,29 @@ class Response
         {
             $this->setResponse($result);
         }
+    }
+
+    /**
+     * Set whether we're sending the user to the sandbox
+     *
+     * @param $sandbox
+     * @return $this
+     */
+    public function setSandbox($sandbox = true)
+    {
+        $this->sandbox = (bool)$sandbox;
+        return $this;
+    }
+
+    /**
+     * Parse the response string and store
+     *
+     */
+    public function authorize()
+    {
+        $payPalURL = $this->getPaypalUrl() . $this->getParameter('TOKEN');
+        header("Location: ".$payPalURL);
+        exit;
     }
 
     /**
@@ -170,5 +196,14 @@ class Response
         }
 
         return strtotime($this->parameters['TIMESTAMP']);
+    }
+
+    /**
+     * Returns the correct paypal URL depending on the sandbox status.
+     *
+     * @return string
+     */
+    public function getPaypalUrl() {
+        return ($this->sandbox ? $this->_sandboxEndPoint : $this->_endPoint);
     }
 }
